@@ -7,34 +7,28 @@ function App() {
   const [alunni, setAlunni] = useState([]);
   const [inCaricamento, setInCaricamento] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [insert, setInsert] = useState(true);
 
   const [nome, setNome] = useState("");
   const [cognome, setCognome] = useState("");
 
-  
-
-  useEffect(() => {
-    loadAlunni();  
-  }, [])
+  useEffect(()=> {
+    loadAlunni();
+  }, []);
 
   async function loadAlunni(){
     setInCaricamento(true);
-    const response =  await fetch(`http://localhost:8080/alunni`, {method: "GET"});
-    const a = await response.json();
-    setAlunni(a);
+    const response = await fetch("http://localhost:8080/alunni", {method: "GET"});
+    const data = await response.json();
+    setAlunni(data);
     setInCaricamento(false);
-  };
-  /*function mostraForm(){
-    setShowForm(true);
-  }*/
+  }
   async function salvaAlunno(){
-    await fetch(`http://localhost:8080/alunni`, 
-    {
+    await fetch("http://localhost:8080/alunni", {
       method: "POST",
-      headers: {'Content-Type' : 'application/json'},
-      body: JSON.stringify({nome: nome, cognome: cognome})
-    }
-    );
+      headers: {"Content-Type" : "application/json"},
+      body: JSON.stringify({nome:nome, cognome:cognome})
+    });
     loadAlunni();
     setShowForm(false);
   }
@@ -45,36 +39,41 @@ function App() {
     setCognome(e.target.value);
   }
 
-  return (
-    <div className="App">
-      <button onClick={loadAlunni}>Carica alunni</button>
-      <hr />
-      { 
-        inCaricamento ? 
-          <div>In caricamento... </div>
-        :
-          alunni.map((alunno) => (
-            <Alunno alunno={alunno} loadAlunni={loadAlunni}  key={alunno.id} />
-          ))
-      }
-
-      <button onClick={() => setShowForm(true)}>Inserisci nuovo alunno</button>
-      { showForm &&
-        <div>
-          <h1>Form di inserimento</h1>
-          <div>Nome: <input type='text' placeholder='Inserisci il nome' onChange={gestisciCambioNome} value={nome}></input></div>
-          <div>Cognome: <input type='text' placeholder='Inserisci il cognome' onChange={gestisciCambioCognome} value={cognome}></input></div>
-          <button onClick={salvaAlunno}>Salva</button>
-          <button onClick={() => setShowForm(false)}>Annulla</button>
-          <div>{nome}{cognome}</div>
+return(
+  <div className='App'>
+    <button onClick={loadAlunni}>Carica alunni</button>
+    <hr />
+    {
+      inCaricamento ?
+      <div>In caricamento...</div>
+      :
+      alunni.map((alunno)=> <Alunno key={alunno.id} alunno={alunno} loadAlunni={loadAlunni} setInsert={setInsert}/>)
+    }
+    { 
+      !showForm ?
+      (
+            <>
+              {
+                 insert &&
+                 <button onClick= {()=> setShowForm(true)}>Aggiungi alunno</button>
+              }
+            </>
+      )
+      :
+      (
+      <div>
+        <h1>Form di inserimento</h1>
+        <div>Nome: <input type="text" placeholder="nome" onChange={gestisciCambioNome} value={nome} /></div>
+        <div>Cognome: <input type="text" placeholder="nome" onChange={gestisciCambioCognome} value={cognome} /></div>
+        <button onClick={salvaAlunno}>Salva</button>
+        <button onClick={()=> setShowForm(false)}>Annulla</button>
+        <div>{nome} {cognome}</div>
         </div>
-      }
+      )
+    }
     </div>
-  );
+);
 }
+  
 
-export default App;
-
-
-
-
+  export default App;
